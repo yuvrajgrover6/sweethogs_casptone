@@ -1,6 +1,12 @@
-import { Request, Response } from "express";
+import { type Request, type Response } from "express";
 import { basicErrorResults } from "../utils/error_handler";
-import { createHome, getHomeById, getAllHomes, updateHome, deleteHome } from "../services/home_service";
+import {
+  createHome,
+  getHomeById,
+  getAllHomes,
+  updateHome,
+  deleteHome,
+} from "../services/home_service";
 import { HomeJSONSchema } from "../models/home_model";
 import { validateData } from "../utils/error_handler";
 import { checkAuthToken } from "../utils/auth_token";
@@ -24,7 +30,7 @@ export async function createNewHomeController(req: Request, res: Response) {
 
 export async function getHomeController(req: Request, res: Response) {
   try {
-    const homeId = req.params.id;
+    const homeId = req.params.id as string;
     const result = await getHomeById(homeId);
     res.status(result.code).json(result);
   } catch (e) {
@@ -47,10 +53,10 @@ export async function listHomesController(req: Request, res: Response) {
 
 export async function updateHomeController(req: Request, res: Response) {
   try {
-    const homeId = req.params.id;
+    const homeId = req.params.id as string;
     const updateData = req.body;
     validateData(HomeJSONSchema, updateData);
-    
+
     const result = await updateHome(homeId, updateData);
     res.status(result.code).json(result);
   } catch (e) {
@@ -61,7 +67,7 @@ export async function updateHomeController(req: Request, res: Response) {
 
 export async function deleteHomeController(req: Request, res: Response) {
   try {
-    const homeId = req.params.id;
+    const homeId = req.params.id as string;
     const result = await deleteHome(homeId);
     res.status(result.code).json(result);
   } catch (e) {

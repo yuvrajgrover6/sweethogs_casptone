@@ -1,6 +1,7 @@
 import { SuccessResult } from "../utils/success_response";
 import { BaseErrorException } from "../utils/error_handler";
-import { HomeModel, IHome } from "../models/home_model";
+import { HomeModel } from "../models/home_model";
+import type { IHome } from "../models/home_model";
 import { Types } from "mongoose";
 
 export async function createHome(homeData: Partial<IHome>) {
