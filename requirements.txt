@@ -1,0 +1,43 @@
+# Node.js Backend Application Requirements
+
+## System Requirements
+- Node.js: >= 18.0.0
+- npm: >= 9.0.0 (or bun >= 1.0.0)
+- MongoDB: >= 4.4.0 (for database)
+- TypeScript: >= 5.0.0
+
+## Runtime Dependencies
+express@^5.1.0                 # Web framework for Node.js
+mongodb@^6.17.0               # MongoDB driver for Node.js
+mongoose@^8.16.2              # MongoDB object modeling tool
+
+## Development Dependencies
+@types/bun@latest             # TypeScript definitions for Bun
+@types/express@^5.0.3         # TypeScript definitions for Express
+@types/mongodb@^4.0.7         # TypeScript definitions for MongoDB
+@types/node@^24.0.12          # TypeScript definitions for Node.js
+
+## Peer Dependencies
+typescript@^5                 # TypeScript compiler
+
+## Installation Commands
+# Using bun:
+# bun install
+
+## Development Setup
+# 1. Ensure Node.js >= 18.0.0 is installed
+# 2. Install dependencies: bun install
+# 3. Set up MongoDB connection
+# 4. Run development server: bun run dev
+
+## Production Requirements
+# - Node.js runtime environment
+# - MongoDB database server
+# - Environment variables for database connection
+# - Process manager (PM2, Forever, etc.) - recommended
+
+## Optional Tools
+# - nodemon: for development auto-restart
+# - eslint: for code linting
+# - prettier: for code formatting
+# - jest: for testing
