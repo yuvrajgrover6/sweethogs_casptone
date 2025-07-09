@@ -1,4 +1,4 @@
-import Ajv, { JSONSchemaType } from "ajv";
+import Ajv from "ajv";
 import { AxiosError } from "axios";
 
 const basicErrorResults = (e: unknown, defaultMessage: string): BaseError => {
@@ -14,7 +14,7 @@ const basicErrorResults = (e: unknown, defaultMessage: string): BaseError => {
     };
   }
 
-  return { message: defaultMessage, error: e.toString(), code: 500 };
+  return { message: defaultMessage, error: String(e), code: 500 };
 };
 export { basicErrorResults };
 
