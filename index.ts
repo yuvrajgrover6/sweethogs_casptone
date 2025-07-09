@@ -2,10 +2,15 @@ import express from 'express';
 import mongoose from 'mongoose';
 import { errorHandler } from './src/middleware/errorHandler';
 import { notFoundHandler } from './src/middleware/notFoundHandler';
+import { routesConfig } from './src/routes/routes';
+import { config, validateConfig } from './src/config/config';
+
+// Validate configuration
+validateConfig();
 
 const app = express();
-const PORT = process.env.PORT || 3000;
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/nodejs-backend-app';
+const PORT = config.server.port;
+const MONGO_URI = config.database.uri;
 
 // MongoDB connection
 mongoose.connect(MONGO_URI)
@@ -21,9 +26,31 @@ mongoose.connect(MONGO_URI)
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Routes
+// Register routes from configuration
+routesConfig.forEach(routeConfig => {
+  const router = express.Router();
+  
+  routeConfig.paths.forEach(pathConfig => {
+    const method = pathConfig.method.toLowerCase() as 'get' | 'post' | 'put' | 'delete' | 'patch';
+    router[method](pathConfig.path, pathConfig.handler);
+  });
+  
+  app.use(routeConfig.base, router);
+});
+
+// Root route
 app.get('/', (req, res) => {
-  res.json({ message: 'Node.js Backend with TypeScript, Bun, Express & MongoDB' });
+  res.json({ 
+    message: 'Node.js Backend with TypeScript, Bun, Express & MongoDB',
+    version: '1.0.0',
+    environment: config.server.env,
+    endpoints: {
+      home: {
+        base: '/home',
+        methods: ['GET', 'POST', 'PUT', 'DELETE']
+      }
+    }
+  });
 });
 
 // Error handling middleware
