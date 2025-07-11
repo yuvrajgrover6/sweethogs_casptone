@@ -2,7 +2,7 @@
 
 ## System Requirements
 - Node.js: >= 18.0.0
-- npm: >= 9.0.0 (or bun >= 1.0.0)
+- bun: >= 1.0.0 (preferred) or npm: >= 9.0.0
 - MongoDB: >= 4.4.0 (for database)
 - TypeScript: >= 5.0.0
 

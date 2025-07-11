@@ -1,7 +1,6 @@
 import jwt from "jsonwebtoken";
 import { BaseErrorException } from "./error_handler";
 import { config } from "../config/config";
-import { User } from "../models/user_model";
 
 const JWT_SECRET = config.jwt.secret;
 const JWT_EXPIRES_IN: number | string | undefined = config.jwt.expiresIn;
@@ -36,8 +35,6 @@ export function generateToken(payload: {
     const tokenPayload = {
       ...payload,
       type: "access" as const,
-      // Add a random nonce to ensure uniqueness
-      nonce: Math.random().toString(36).substring(2),
     };
     const options: jwt.SignOptions = {
       expiresIn: JWT_EXPIRES_IN as jwt.SignOptions["expiresIn"],
@@ -63,8 +60,6 @@ export function generateRefreshToken(payload: {
     const tokenPayload = {
       ...payload,
       type: "refresh" as const,
-      // Add a random nonce to ensure uniqueness
-      nonce: Math.random().toString(36).substring(2),
     };
     const options: jwt.SignOptions = {
       expiresIn: JWT_REFRESH_EXPIRES_IN as jwt.SignOptions["expiresIn"],
@@ -132,7 +127,7 @@ export function checkAuthToken(token: string | undefined): TokenPayload {
   }
 }
 
-export async function verifyRefreshToken(token: string): Promise<TokenPayload> {
+export function verifyRefreshToken(token: string): TokenPayload {
   if (!token) {
     throw new BaseErrorException({
       message: "No refresh token provided",
@@ -154,31 +149,6 @@ export async function verifyRefreshToken(token: string): Promise<TokenPayload> {
         code: 401,
       });
     }
-
-    // Check if the refresh token exists in the database
-    const user = await User.findById(decoded.userId);
-    if (!user) {
-      throw new BaseErrorException({
-        message: "User not found",
-        error: "USER_NOT_FOUND",
-        logInfo: { userId: decoded.userId },
-        code: 401,
-      });
-    }
-
-    // Check if this specific refresh token is stored for this user
-    if (!user.refreshTokens || !user.refreshTokens.includes(token)) {
-      throw new BaseErrorException({
-        message: "Refresh token not found or already used",
-        error: "REFRESH_TOKEN_NOT_FOUND",
-        logInfo: { userId: decoded.userId },
-        code: 401,
-      });
-    }
-
-    // IMPORTANT: Remove the used refresh token from database (rotation)
-    user.refreshTokens = user.refreshTokens.filter((rt) => rt !== token);
-    await user.save();
 
     return decoded;
   } catch (error) {
@@ -209,29 +179,15 @@ export function checkAdmin(token: string | undefined): TokenPayload {
   return decoded;
 }
 
-export async function refreshAccessToken(
-  refreshToken: string
-): Promise<TokenPair> {
-  const decoded = await verifyRefreshToken(refreshToken);
+export function refreshAccessToken(refreshToken: string): TokenPair {
+  const decoded = verifyRefreshToken(refreshToken);
 
   // Generate new token pair with same payload but fresh expiration
-  const newTokenPair = generateTokenPair({
+  return generateTokenPair({
     userId: decoded.userId,
     email: decoded.email,
     role: decoded.role,
   });
-
-  // Store the new refresh token in the database
-  const user = await User.findById(decoded.userId);
-  if (user) {
-    if (!user.refreshTokens) {
-      user.refreshTokens = [];
-    }
-    user.refreshTokens.push(newTokenPair.refreshToken);
-    await user.save();
-  }
-
-  return newTokenPair;
 }
 
 // Legacy function - kept for backward compatibility

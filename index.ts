@@ -4,6 +4,7 @@ import { errorHandler } from "./src/middleware/errorHandler";
 import { notFoundHandler } from "./src/middleware/notFoundHandler";
 import { routesConfig } from "./src/routes/routes";
 import { config, validateConfig } from "./src/config/config";
+import cors from "cors";
 
 // Validate configuration
 validateConfig();
@@ -26,6 +27,7 @@ mongoose
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cors());
 
 // Register routes from configuration
 routesConfig.forEach((routeConfig) => {
@@ -38,7 +40,13 @@ routesConfig.forEach((routeConfig) => {
       | "put"
       | "delete"
       | "patch";
-    router[method](pathConfig.path, pathConfig.handler);
+
+    // Handle both single handlers and arrays of handlers (for middleware)
+    if (Array.isArray(pathConfig.handler)) {
+      router[method](pathConfig.path, ...pathConfig.handler);
+    } else {
+      router[method](pathConfig.path, pathConfig.handler);
+    }
   });
 
   app.use(routeConfig.base, router);

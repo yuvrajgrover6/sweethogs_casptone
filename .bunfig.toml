@@ -1,0 +1,16 @@
+[install]
+# Configure Bun package manager settings
+frozenLockfile = true
+production = false
+dev = true
+
+[install.scopes]
+# Configure any scoped packages if needed
+
+[run]
+# Configure script execution
+bun = true
+
+[test]
+# Configure test settings
+coverage = true
