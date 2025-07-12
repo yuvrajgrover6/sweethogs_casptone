@@ -41,10 +41,20 @@ routesConfig.forEach((routeConfig) => {
       | "delete"
       | "patch";
 
-    // Handle both single handlers and arrays of handlers (for middleware)
-    if (Array.isArray(pathConfig.handler)) {
-      router[method](pathConfig.path, ...pathConfig.handler);
+    // Handle middleware and handlers
+    if (
+      "middleware" in pathConfig &&
+      pathConfig.middleware &&
+      pathConfig.middleware.length > 0
+    ) {
+      // Register route with middleware followed by handler
+      router[method](
+        pathConfig.path,
+        ...pathConfig.middleware,
+        pathConfig.handler
+      );
     } else {
+      // Register route with just the handler
       router[method](pathConfig.path, pathConfig.handler);
     }
   });

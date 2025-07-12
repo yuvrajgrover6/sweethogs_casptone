@@ -15,7 +15,18 @@ import {
   updateProfileController,
   changePasswordController,
 } from "../controllers/auth_controller";
+import {
+  predictReadmissionController,
+  predictBatchReadmissionController,
+  getModelInfoController,
+  testPredictionController,
+} from "../controllers/readmission_controller";
 import { authenticateToken } from "../middleware/authMiddleware";
+import { validateRequest } from "../middleware/validation";
+import {
+  readmissionPredictionSchema,
+  batchReadmissionPredictionSchema,
+} from "../utils/validation_schemas";
 
 export const routesConfig = [
   {
@@ -90,6 +101,40 @@ export const routesConfig = [
         path: "/:id",
         method: "DELETE",
         handler: deleteHomeController,
+      },
+    ],
+  },
+  {
+    base: "/readmission",
+    paths: [
+      {
+        path: "/predict",
+        method: "POST",
+        handler: predictReadmissionController,
+        middleware: [
+          authenticateToken,
+          validateRequest(readmissionPredictionSchema),
+        ],
+      },
+      {
+        path: "/predict/batch",
+        method: "POST",
+        handler: predictBatchReadmissionController,
+        middleware: [
+          authenticateToken,
+          validateRequest(batchReadmissionPredictionSchema),
+        ],
+      },
+      {
+        path: "/model-info",
+        method: "GET",
+        handler: getModelInfoController,
+        middleware: [authenticateToken],
+      },
+      {
+        path: "/test",
+        method: "GET",
+        handler: testPredictionController,
       },
     ],
   },
