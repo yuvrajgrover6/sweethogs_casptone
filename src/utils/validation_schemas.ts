@@ -280,7 +280,7 @@ export const diabeticPatientSchema = {
     "A1Cresult",
     "diabetesMed",
   ],
-  additionalProperties: false,
+  additionalProperties: true,
 };
 
 export const readmissionPredictionSchema = {
@@ -289,7 +289,7 @@ export const readmissionPredictionSchema = {
     patientData: diabeticPatientSchema,
   },
   required: ["patientData"],
-  additionalProperties: false,
+  additionalProperties: true,
 };
 
 export const batchReadmissionPredictionSchema = {
@@ -303,5 +303,5 @@ export const batchReadmissionPredictionSchema = {
     },
   },
   required: ["patientsData"],
-  additionalProperties: false,
+  additionalProperties: true,
 };
