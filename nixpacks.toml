@@ -1,0 +1,12 @@
+[variables]
+NODE_ENV = "production"
+
+[phases.install]
+dependsOn = ["build"]
+cmds = ["npm install"]
+
+[phases.build]
+dependsOn = []
+
+[start]
+cmd = "npm start"

@@ -27,7 +27,12 @@ mongoose
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cors());
+app.use(cors({
+  origin: config.server.env === 'production' 
+    ? [process.env.FRONTEND_URL || 'https://your-frontend-domain.com']
+    : '*',
+  credentials: true
+}));
 
 // Register routes from configuration
 routesConfig.forEach((routeConfig) => {
@@ -67,6 +72,16 @@ app.get("/", (req, res) => {
   res.json({
     message: "Node.js Backend with TypeScript, Bun, Express & MongoDB",
     version: "1.0.0",
+    environment: config.server.env,
+  });
+});
+
+// Health check endpoint for Railway
+app.get("/health", (req, res) => {
+  res.json({
+    status: "OK",
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
     environment: config.server.env,
   });
 });

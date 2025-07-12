@@ -3,7 +3,8 @@
   "module": "index.ts",
   "type": "module",
   "scripts": {
-    "start": "bun run index.ts",
+    "start": "tsx index.ts",
+    "start:bun": "bun run index.ts",
     "dev": "bun run index.ts --watch",
     "test": "bun test"
   },
@@ -13,7 +14,7 @@
     "@types/bun": "latest",
     "@types/cors": "^2.8.19",
     "@types/mongodb": "^4.0.7",
-    "@types/node": "^24.0.12"
+    "@types/node": "^24.0.13"
   },
   "peerDependencies": {
     "typescript": "^5"
@@ -29,6 +30,8 @@
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
     "mongodb": "^6.17.0",
-    "mongoose": "^8.16.2"
+    "mongoose": "^8.16.2",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.20.3"
   }
 }
