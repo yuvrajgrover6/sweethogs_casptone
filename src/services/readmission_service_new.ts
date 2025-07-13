@@ -12,7 +12,7 @@ export class ReadmissionService {
    */
   async predictReadmissionScore(
     patientData: DiabeticPatientData
-  ): Promise<{ confidence_score: number; remedy?: string | null }> {
+  ): Promise<{ confidence_score: number }> {
     try {
       const response = await fetch(`${this.FLASK_ML_URL}/predict`, {
         method: "POST",
@@ -40,14 +40,7 @@ export class ReadmissionService {
       // Convert confidence score from 0-1 range to 0-100 range
       const confidence_score = Math.round((result.confidence_score || 0) * 100);
 
-      // Include remedy if provided by Flask ML API
-      const predictionResult: { confidence_score: number; remedy?: string | null } = { confidence_score };
-      
-      if (result.remedy !== undefined) {
-        predictionResult.remedy = result.remedy;
-      }
-
-      return predictionResult;
+      return { confidence_score };
     } catch (error) {
       console.error("Flask ML API error:", error);
       throw new BaseErrorException({
@@ -64,7 +57,7 @@ export class ReadmissionService {
    */
   async predictBatchReadmissionScore(
     patientsData: DiabeticPatientData[]
-  ): Promise<{ confidence_score: number; remedy?: string | null }[]> {
+  ): Promise<{ confidence_score: number }[]> {
     try {
       const predictions = await Promise.all(
         patientsData.map((patientData) =>

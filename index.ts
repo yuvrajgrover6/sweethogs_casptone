@@ -27,12 +27,12 @@ mongoose
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cors({
-  origin: config.server.env === 'production' 
-    ? [process.env.FRONTEND_URL || 'https://your-frontend-domain.com']
-    : '*',
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: "*",
+    credentials: false,
+  })
+);
 
 // Register routes from configuration
 routesConfig.forEach((routeConfig) => {

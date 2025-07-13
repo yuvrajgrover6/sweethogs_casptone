@@ -1,13 +1,19 @@
-# Diabetic Patient Readmission Prediction API
+# Medical Readmission Prediction API
 
 ## Overview
 
-This API provides diabetic patient readmission risk prediction using machine learning algorithms. The API analyzes patient data and returns a confidence score indicating the likelihood of hospital readmission.
+The Medical Readmission Prediction API is a comprehensive system that provides machine learning predictions for patient readmission risk. The system consists of:
 
-## Base URL
+1. **Node.js Backend API** (Authentication & Data Management) - `http://localhost:3000`
+2. **Flask ML Service** (Prediction Engine) - `http://localhost:8080`
+
+The Node.js API handles user authentication and data validation, while the Flask service runs the SingleShotCNN deep learning model for predictions.
+
+## Base URLs
 
 ```
-http://localhost:3000
+Node.js API: http://localhost:3000
+Flask ML Service: http://localhost:8080
 ```
 
 ## Authentication
@@ -40,7 +46,8 @@ curl -X GET "http://localhost:3000/readmission/test" \
   "code": 200,
   "message": "Test prediction completed successfully",
   "body": {
-    "confidence_score": 48
+    "confidence_score": 48,
+    "remedy": "Consider medication adjustment and lifestyle modifications"
   }
 }
 ```
@@ -191,7 +198,8 @@ console.log(data);
   "code": 200,
   "message": "Readmission prediction completed successfully",
   "body": {
-    "confidence_score": 48
+    "confidence_score": 48,
+    "remedy": "Consider medication adjustment and lifestyle modifications"
   }
 }
 ```
@@ -267,7 +275,8 @@ curl -X POST "http://localhost:3000/readmission/predict/batch" \
   "body": {
     "predictions": [
       {
-        "confidence_score": 48
+        "confidence_score": 48,
+        "remedy": "Consider medication adjustment and lifestyle modifications"
       }
     ],
     "total_patients": 1
@@ -305,8 +314,8 @@ curl -X GET "http://localhost:3000/readmission/model-info" \
       "clinical_factors": [
         "time_in_hospital",
         "number_diagnoses",
-        "admission_type",
-        "discharge_disposition",
+        "admission_type_id",
+        "discharge_disposition_id",
         "medical_specialty"
       ],
       "medication_factors": [
@@ -391,6 +400,15 @@ All API responses follow this structure:
   }
 }
 ```
+
+---
+
+## Response Fields
+
+### Prediction Response
+
+- **`confidence_score`** (number): A score from 0-100 representing the likelihood of hospital readmission
+- **`remedy`** (string | null, optional): Recommended remedial actions or treatment suggestions from the ML model. This field may be null or absent if no specific remedy is suggested.
 
 ---
 

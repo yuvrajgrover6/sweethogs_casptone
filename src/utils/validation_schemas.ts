@@ -129,26 +129,11 @@ export const AuthValidationSchemas = {
   },
 };
 
-// Diabetic patient data validation schema
+// Diabetic patient data validation schema (matching Flask ML API)
 export const diabeticPatientSchema = {
   type: "object",
   properties: {
-    encounter_id: {
-      type: "number",
-      minimum: 1,
-    },
-    patient_nbr: {
-      type: "number",
-      minimum: 1,
-    },
-    race: {
-      type: "string",
-      enum: ["Caucasian", "AfricanAmerican", "Asian", "Hispanic", "Other", "?"],
-    },
-    gender: {
-      type: "string",
-      enum: ["Male", "Female", "Unknown/Invalid"],
-    },
+    // Required parameters
     age: {
       type: "string",
       enum: [
@@ -164,132 +149,124 @@ export const diabeticPatientSchema = {
         "[90-100)",
       ],
     },
-    weight: {
+    gender: {
       type: "string",
-      default: "?",
-    },
-    admission_type_id: {
-      type: "number",
-      minimum: 1,
-      maximum: 8,
-    },
-    discharge_disposition_id: {
-      type: "number",
-      minimum: 1,
-    },
-    admission_source_id: {
-      type: "number",
-      minimum: 1,
+      enum: ["Male", "Female"],
     },
     time_in_hospital: {
       type: "number",
       minimum: 1,
       maximum: 14,
     },
-    payer_code: {
-      type: "string",
-    },
-    medical_specialty: {
-      type: "string",
-    },
-    num_lab_procedures: {
+    admission_type: {
       type: "number",
-      minimum: 0,
+      minimum: 1,
+      maximum: 8,
     },
-    num_procedures: {
+    discharge_disposition: {
       type: "number",
-      minimum: 0,
+      minimum: 1,
+      maximum: 30,
+    },
+    admission_source: {
+      type: "number",
+      minimum: 1,
+      maximum: 26,
     },
     num_medications: {
       type: "number",
       minimum: 0,
+      maximum: 81,
     },
-    number_outpatient: {
+    num_lab_procedures: {
       type: "number",
       minimum: 0,
+      maximum: 132,
     },
-    number_emergency: {
+    num_procedures: {
       type: "number",
       minimum: 0,
-    },
-    number_inpatient: {
-      type: "number",
-      minimum: 0,
-    },
-    diag_1: {
-      type: "string",
-      minLength: 1,
-    },
-    diag_2: {
-      type: "string",
-    },
-    diag_3: {
-      type: "string",
+      maximum: 6,
     },
     number_diagnoses: {
       type: "number",
       minimum: 1,
+      maximum: 16,
     },
-    max_glu_serum: {
-      type: "string",
-      enum: ["None", "Norm", ">200", ">300", "?"],
+    number_inpatient: {
+      type: "number",
+      minimum: 0,
+      maximum: 21,
     },
-    A1Cresult: {
-      type: "string",
-      enum: ["None", "Norm", ">7", ">8", "?"],
+    number_outpatient: {
+      type: "number",
+      minimum: 0,
+      maximum: 42,
     },
-    metformin: {
-      type: "string",
-      enum: ["No", "Steady", "Up", "Down"],
-      default: "No",
-    },
-    insulin: {
-      type: "string",
-      enum: ["No", "Steady", "Up", "Down"],
-      default: "No",
-    },
-    change: {
-      type: "string",
-      enum: ["No", "Ch"],
-      default: "No",
+    number_emergency: {
+      type: "number",
+      minimum: 0,
+      maximum: 76,
     },
     diabetesMed: {
       type: "string",
       enum: ["Yes", "No"],
     },
+    change: {
+      type: "string",
+      enum: ["No", "Ch"],
+    },
+    A1Cresult: {
+      type: "string",
+      enum: [">7", ">8", "Norm", "None"],
+    },
+    max_glu_serum: {
+      type: "string",
+      enum: [">200", ">300", "Norm", "None"],
+    },
+    insulin: {
+      type: "string",
+      enum: ["Down", "Steady", "Up", "No"],
+    },
+    metformin: {
+      type: "string",
+      enum: ["Down", "Steady", "Up", "No"],
+    },
+    diagnosis_1: {
+      type: "string",
+      minLength: 1,
+    },
   },
   required: [
-    "encounter_id",
-    "patient_nbr",
-    "race",
-    "gender",
     "age",
-    "admission_type_id",
-    "discharge_disposition_id",
-    "admission_source_id",
+    "gender",
     "time_in_hospital",
+    "admission_type",
+    "discharge_disposition",
+    "admission_source",
+    "num_medications",
     "num_lab_procedures",
     "num_procedures",
-    "num_medications",
+    "number_diagnoses",
+    "number_inpatient",
     "number_outpatient",
     "number_emergency",
-    "number_inpatient",
-    "diag_1",
-    "number_diagnoses",
-    "max_glu_serum",
-    "A1Cresult",
     "diabetesMed",
+    "change",
+    "A1Cresult",
+    "max_glu_serum",
+    "insulin",
+    "metformin",
+    "diagnosis_1",
   ],
-  additionalProperties: true,
+  additionalProperties: false,
 };
 
 export const readmissionPredictionSchema = {
   type: "object",
-  properties: {
-    patientData: diabeticPatientSchema,
-  },
-  required: ["patientData"],
-  additionalProperties: true,
+  properties: diabeticPatientSchema.properties,
+  required: diabeticPatientSchema.required,
+  additionalProperties: false,
 };
 
 export const batchReadmissionPredictionSchema = {
@@ -303,5 +280,5 @@ export const batchReadmissionPredictionSchema = {
     },
   },
   required: ["patientsData"],
-  additionalProperties: true,
+  additionalProperties: false,
 };

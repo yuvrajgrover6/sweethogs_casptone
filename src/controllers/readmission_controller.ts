@@ -18,11 +18,12 @@ export async function predictReadmissionController(
   res: Response
 ) {
   try {
-    const { patientData }: ReadmissionPredictionRequest = req.body;
+    // Expect patient data directly in request body (not nested in patientData)
+    const patientData = req.body as DiabeticPatientData;
 
-    if (!patientData) {
+    if (!patientData || !patientData.age || !patientData.gender) {
       throw new BaseErrorException({
-        message: "Patient data is required",
+        message: "Patient data is required with at least age and gender",
         error: "MISSING_PATIENT_DATA",
         logInfo: {},
         code: 400,
@@ -106,22 +107,23 @@ export async function getModelInfoController(
   try {
     const modelInfo = {
       model_version: "v1.0.0",
-      model_type: "Risk Scoring Algorithm",
-      description: "Diabetic patient readmission risk prediction model",
+      model_type: "SingleShotCNN Deep Learning Model",
+      description: "Diabetic patient readmission risk prediction using deep learning with temperature scaling",
       features: {
-        demographic_factors: ["age", "gender", "race"],
+        demographic_factors: ["age", "gender"],
         clinical_factors: [
           "time_in_hospital",
           "number_diagnoses",
           "admission_type",
           "discharge_disposition",
-          "medical_specialty",
+          "admission_source",
         ],
         medication_factors: [
           "num_medications",
-          "diabetes_medications",
-          "medication_changes",
-          "insulin_usage",
+          "diabetesMed",
+          "change",
+          "insulin",
+          "metformin",
         ],
         utilization_factors: [
           "number_inpatient",
@@ -164,29 +166,21 @@ export async function getModelInfoController(
  */
 export async function testPredictionController(req: Request, res: Response) {
   try {
-    // Sample patient data for testing
+    // Sample patient data for testing (matching Flask ML API structure)
     const samplePatient: DiabeticPatientData = {
-      encounter_id: 123456,
-      patient_nbr: 789012,
-      race: "Caucasian",
       gender: "Male",
       age: "[60-70)",
-      weight: "?",
-      admission_type_id: 1, // Emergency
-      discharge_disposition_id: 1,
-      admission_source_id: 7,
+      admission_type: 1, // Emergency
+      discharge_disposition: 1,
+      admission_source: 7,
       time_in_hospital: 5,
-      payer_code: "MC",
-      medical_specialty: "InternalMedicine",
       num_lab_procedures: 35,
       num_procedures: 2,
       num_medications: 12,
       number_outpatient: 3,
       number_emergency: 1,
       number_inpatient: 1,
-      diag_1: "250.01",
-      diag_2: "401.9",
-      diag_3: "?",
+      diagnosis_1: "250.01",
       number_diagnoses: 5,
       max_glu_serum: ">200",
       A1Cresult: ">8",
