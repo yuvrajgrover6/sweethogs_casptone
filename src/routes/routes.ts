@@ -21,11 +21,13 @@ import {
   getModelInfoController,
   testPredictionController,
 } from "../controllers/readmission_controller";
+import PatientController from "../controllers/patient_controller";
 import { authenticateToken } from "../middleware/authMiddleware";
 import { validateRequest } from "../middleware/validation";
 import {
   readmissionPredictionSchema,
   batchReadmissionPredictionSchema,
+  PatientValidationSchemas,
 } from "../utils/validation_schemas";
 
 export const routesConfig = [
@@ -135,6 +137,71 @@ export const routesConfig = [
         path: "/test",
         method: "GET",
         handler: testPredictionController,
+      },
+    ],
+  },
+  {
+    base: "/patients",
+    paths: [
+      {
+        path: "/",
+        method: "GET",
+        handler: (req: any, res: any) => PatientController.getAllPatients(req, res),
+        middleware: [authenticateToken],
+      },
+      {
+        path: "/",
+        method: "POST",
+        handler: (req: any, res: any) => PatientController.createPatient(req, res),
+        middleware: [
+          authenticateToken,
+          validateRequest(PatientValidationSchemas.createPatient),
+        ],
+      },
+      {
+        path: "/stats",
+        method: "GET",
+        handler: (req: any, res: any) => PatientController.getPatientStats(req, res),
+        middleware: [authenticateToken],
+      },
+      {
+        path: "/import-sample",
+        method: "POST",
+        handler: (req: any, res: any) => PatientController.importSampleData(req, res),
+        middleware: [authenticateToken],
+      },
+      {
+        path: "/:id",
+        method: "GET",
+        handler: (req: any, res: any) => PatientController.getPatientById(req, res),
+        middleware: [authenticateToken],
+      },
+      {
+        path: "/:id",
+        method: "PUT",
+        handler: (req: any, res: any) => PatientController.updatePatient(req, res),
+        middleware: [
+          authenticateToken,
+          validateRequest(PatientValidationSchemas.updatePatient),
+        ],
+      },
+      {
+        path: "/:id",
+        method: "DELETE",
+        handler: (req: any, res: any) => PatientController.deletePatient(req, res),
+        middleware: [authenticateToken],
+      },
+      {
+        path: "/encounter/:encounterId",
+        method: "GET",
+        handler: (req: any, res: any) => PatientController.getPatientByEncounterId(req, res),
+        middleware: [authenticateToken],
+      },
+      {
+        path: "/patient-number/:patientNumber",
+        method: "GET",
+        handler: (req: any, res: any) => PatientController.getPatientByPatientNumber(req, res),
+        middleware: [authenticateToken],
       },
     ],
   },

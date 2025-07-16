@@ -24,9 +24,187 @@ Most endpoints require JWT authentication. Include the token in the Authorizatio
 Authorization: Bearer <your_jwt_token>
 ```
 
+# Medical Readmission Prediction API
+
+## Overview
+
+The Medical Readmission Prediction API is a comprehensive system that provides machine learning predictions for patient readmission risk and complete patient data management. The system consists of:
+
+1. **Node.js Backend API** (Authentication, Data Management & Patient CRUD) - `http://localhost:3000`
+2. **Flask ML Service** (Prediction Engine) - `http://localhost:8080`
+
+The Node.js API handles user authentication, patient data management, and data validation, while the Flask service runs the SingleShotCNN deep learning model for predictions.
+
+## Base URLs
+
+```
+Node.js API: http://localhost:3000
+Flask ML Service: http://localhost:8080
+```
+
+## Authentication
+
+Most endpoints require JWT authentication. Include the token in the Authorization header:
+
+```
+Authorization: Bearer <your_jwt_token>
+```
+
 ## API Endpoints
 
-### 1. Test Prediction (Public)
+### 1. Patient Management
+
+#### Get All Patients
+- **URL**: `/patients`
+- **Method**: `GET`
+- **Auth**: Required
+- **Query Parameters**:
+  - `page` (number): Page number (default: 1)
+  - `limit` (number): Items per page (default: 10, max: 100)
+  - `search` (string): Search term for patient number, encounter ID, diagnosis, or medical specialty
+  - `gender` (string): Filter by gender (`Male`, `Female`)
+  - `age_range` (string): Filter by age range (e.g., `0-20`, `21-40`)
+  - `diabetesMed` (string): Filter by diabetes medication (`Yes`, `No`)
+  - `readmitted` (string): Filter by readmission status (`YES`, `NO`, `>30`, `<30`)
+  - `sort_by` (string): Field to sort by
+  - `sort_order` (string): Sort order (`asc`, `desc`)
+  - `date_from` (string): Filter from date (YYYY-MM-DD)
+  - `date_to` (string): Filter to date (YYYY-MM-DD)
+
+**Example Request**:
+```bash
+curl -X GET "http://localhost:3000/patients?page=1&limit=10&gender=Male&diabetesMed=Yes" \
+  -H "Authorization: Bearer <token>"
+```
+
+**Response**:
+```json
+{
+  "code": 200,
+  "message": "Patients retrieved successfully",
+  "body": {
+    "patients": [...],
+    "total": 150,
+    "page": 1,
+    "limit": 10,
+    "total_pages": 15
+  }
+}
+```
+
+#### Create New Patient
+- **URL**: `/patients`
+- **Method**: `POST`
+- **Auth**: Required
+- **Content-Type**: `application/json`
+
+**Request Body**:
+```json
+{
+  "encounter_id": 12345,
+  "patient_nbr": 67890,
+  "race": "Caucasian",
+  "gender": "Male",
+  "age": "[50-60)",
+  "weight": "75-100",
+  "admission_type_id": 1,
+  "discharge_disposition_id": 1,
+  "admission_source_id": 7,
+  "time_in_hospital": 3,
+  "payer_code": "MC",
+  "medical_specialty": "InternalMedicine",
+  "num_lab_procedures": 40,
+  "num_procedures": 1,
+  "num_medications": 15,
+  "number_outpatient": 0,
+  "number_emergency": 0,
+  "number_inpatient": 0,
+  "diag_1": "414.01",
+  "diag_2": "V45.81",
+  "diag_3": "414.01",
+  "number_diagnoses": 9,
+  "max_glu_serum": "None",
+  "A1Cresult": "None",
+  "metformin": "No",
+  "insulin": "Up",
+  "change": "Ch",
+  "diabetesMed": "Yes",
+  "readmitted": "NO"
+}
+```
+
+#### Get Patient by ID
+- **URL**: `/patients/:id`
+- **Method**: `GET`
+- **Auth**: Required
+
+#### Update Patient
+- **URL**: `/patients/:id`
+- **Method**: `PUT`
+- **Auth**: Required
+- **Body**: Partial patient data (same structure as create, but all fields optional except those being updated)
+
+#### Delete Patient
+- **URL**: `/patients/:id`
+- **Method**: `DELETE`
+- **Auth**: Required
+
+#### Get Patient by Encounter ID
+- **URL**: `/patients/encounter/:encounterId`
+- **Method**: `GET`
+- **Auth**: Required
+
+#### Get Patient by Patient Number
+- **URL**: `/patients/patient-number/:patientNumber`
+- **Method**: `GET`
+- **Auth**: Required
+
+#### Get Patient Statistics
+- **URL**: `/patients/stats`
+- **Method**: `GET`
+- **Auth**: Required
+
+**Response**:
+```json
+{
+  "code": 200,
+  "message": "Patient statistics retrieved successfully",
+  "body": {
+    "stats": {
+      "total_patients": 1000,
+      "by_gender": {
+        "Male": 450,
+        "Female": 550
+      },
+      "by_age_group": {
+        "[0-10)": 50,
+        "[10-20)": 75,
+        "[50-60)": 200
+      },
+      "by_diabetes_medication": {
+        "Yes": 800,
+        "No": 200
+      },
+      "by_readmission": {
+        "YES": 100,
+        "NO": 700,
+        ">30": 150,
+        "<30": 50
+      },
+      "average_hospital_stay": 4.2,
+      "average_medications": 12.5
+    }
+  }
+}
+```
+
+#### Import Sample Data
+- **URL**: `/patients/import-sample`
+- **Method**: `POST`
+- **Auth**: Required
+- **Description**: Imports patient data from the `sample_data.json` file
+
+### 2. Test Prediction (Public)
 
 **Endpoint:** `GET /readmission/test`  
 **Authentication:** Not required  
@@ -71,36 +249,26 @@ Authorization: Bearer <your_jwt_token>
 
 ```json
 {
-  "patientData": {
-    "encounter_id": 123456,
-    "patient_nbr": 789012,
-    "race": "Caucasian",
-    "gender": "Male",
-    "age": "[60-70)",
-    "weight": "?",
-    "admission_type_id": 1,
-    "discharge_disposition_id": 1,
-    "admission_source_id": 7,
-    "time_in_hospital": 5,
-    "payer_code": "MC",
-    "medical_specialty": "InternalMedicine",
-    "num_lab_procedures": 35,
-    "num_procedures": 2,
-    "num_medications": 12,
-    "number_outpatient": 3,
-    "number_emergency": 1,
-    "number_inpatient": 1,
-    "diag_1": "250.01",
-    "diag_2": "401.9",
-    "diag_3": "?",
-    "number_diagnoses": 5,
-    "max_glu_serum": ">200",
-    "A1Cresult": ">8",
-    "metformin": "Steady",
-    "insulin": "Up",
-    "change": "Ch",
-    "diabetesMed": "Yes"
-  }
+  "age": "[60-70)",
+  "gender": "Male",
+  "time_in_hospital": 5,
+  "admission_type": 1,
+  "discharge_disposition": 1,
+  "admission_source": 7,
+  "num_medications": 12,
+  "num_lab_procedures": 35,
+  "num_procedures": 2,
+  "number_diagnoses": 5,
+  "number_inpatient": 1,
+  "number_outpatient": 3,
+  "number_emergency": 1,
+  "diabetesMed": "Yes",
+  "change": "Ch",
+  "A1Cresult": ">8",
+  "max_glu_serum": ">200",
+  "insulin": "Up",
+  "metformin": "Steady",
+  "diagnosis_1": "250"
 }
 ```
 
@@ -111,37 +279,27 @@ curl -X POST "http://localhost:3000/readmission/predict" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{
-    "patientData": {
-        "encounter_id": 123456,
-        "patient_nbr": 789012,
-        "race": "Caucasian",
-        "gender": "Male",
-        "age": "[60-70)",
-        "weight": "?",
-        "admission_type_id": 1,
-        "discharge_disposition_id": 1,
-        "admission_source_id": 7,
-        "time_in_hospital": 5,
-        "payer_code": "MC",
-        "medical_specialty": "InternalMedicine",
-        "num_lab_procedures": 35,
-        "num_procedures": 2,
-        "num_medications": 12,
-        "number_outpatient": 3,
-        "number_emergency": 1,
-        "number_inpatient": 1,
-        "diag_1": "250.01",
-        "diag_2": "401.9",
-        "diag_3": "?",
-        "number_diagnoses": 5,
-        "max_glu_serum": ">200",
-        "A1Cresult": ">8",
-        "metformin": "Steady",
-        "insulin": "Up",
-        "change": "Ch",
-        "diabetesMed": "Yes"
-    }
-}'
+    "age": "[60-70)",
+    "gender": "Male",
+    "time_in_hospital": 5,
+    "admission_type": 1,
+    "discharge_disposition": 1,
+    "admission_source": 7,
+    "num_medications": 12,
+    "num_lab_procedures": 35,
+    "num_procedures": 2,
+    "number_diagnoses": 5,
+    "number_inpatient": 1,
+    "number_outpatient": 3,
+    "number_emergency": 1,
+    "diabetesMed": "Yes",
+    "change": "Ch",
+    "A1Cresult": ">8",
+    "max_glu_serum": ">200",
+    "insulin": "Up",
+    "metformin": "Steady",
+    "diagnosis_1": "250"
+  }'
 ```
 
 #### Request Example (JavaScript/Fetch):
@@ -154,36 +312,26 @@ const response = await fetch("http://localhost:3000/readmission/predict", {
     Authorization: `Bearer ${jwtToken}`,
   },
   body: JSON.stringify({
-    patientData: {
-      encounter_id: 123456,
-      patient_nbr: 789012,
-      race: "Caucasian",
-      gender: "Male",
-      age: "[60-70)",
-      weight: "?",
-      admission_type_id: 1,
-      discharge_disposition_id: 1,
-      admission_source_id: 7,
-      time_in_hospital: 5,
-      payer_code: "MC",
-      medical_specialty: "InternalMedicine",
-      num_lab_procedures: 35,
-      num_procedures: 2,
-      num_medications: 12,
-      number_outpatient: 3,
-      number_emergency: 1,
-      number_inpatient: 1,
-      diag_1: "250.01",
-      diag_2: "401.9",
-      diag_3: "?",
-      number_diagnoses: 5,
-      max_glu_serum: ">200",
-      A1Cresult: ">8",
-      metformin: "Steady",
-      insulin: "Up",
-      change: "Ch",
-      diabetesMed: "Yes",
-    },
+    age: "[60-70)",
+    gender: "Male",
+    time_in_hospital: 5,
+    admission_type: 1,
+    discharge_disposition: 1,
+    admission_source: 7,
+    num_medications: 12,
+    num_lab_procedures: 35,
+    num_procedures: 2,
+    number_diagnoses: 5,
+    number_inpatient: 1,
+    number_outpatient: 3,
+    number_emergency: 1,
+    diabetesMed: "Yes",
+    change: "Ch",
+    A1Cresult: ">8",
+    max_glu_serum: ">200",
+    insulin: "Up",
+    metformin: "Steady",
+    diagnosis_1: "250"
   }),
 });
 
@@ -353,37 +501,26 @@ curl -X GET "http://localhost:3000/readmission/model-info" \
 
 ### Required Fields:
 
-- `encounter_id` (number): Unique encounter identifier
-- `patient_nbr` (number): Unique patient identifier
-- `race` (string): Patient race - Values: "Caucasian", "AfricanAmerican", "Asian", "Hispanic", "Other", "?"
-- `gender` (string): Patient gender - Values: "Male", "Female", "Unknown/Invalid"
 - `age` (string): Age range - Values: "[0-10)", "[10-20)", "[20-30)", "[30-40)", "[40-50)", "[50-60)", "[60-70)", "[70-80)", "[80-90)", "[90-100)"
-- `admission_type_id` (number): Admission type (1-8)
-- `discharge_disposition_id` (number): Discharge disposition ID
-- `admission_source_id` (number): Admission source ID
+- `gender` (string): Patient gender - Values: "Male", "Female"
 - `time_in_hospital` (number): Days in hospital (1-14)
-- `num_lab_procedures` (number): Number of lab procedures
-- `num_procedures` (number): Number of procedures
-- `num_medications` (number): Number of medications
-- `number_outpatient` (number): Number of outpatient visits
-- `number_emergency` (number): Number of emergency visits
-- `number_inpatient` (number): Number of inpatient visits
-- `diag_1` (string): Primary diagnosis
-- `number_diagnoses` (number): Total number of diagnoses
-- `max_glu_serum` (string): Glucose serum test result - Values: "None", "Norm", ">200", ">300", "?"
-- `A1Cresult` (string): HbA1c test result - Values: "None", "Norm", ">7", ">8", "?"
+- `admission_type` (number): Admission type (1-8)
+- `discharge_disposition` (number): Discharge disposition ID (1-30)
+- `admission_source` (number): Admission source ID (1-26)
+- `num_medications` (number): Number of medications (0-81)
+- `num_lab_procedures` (number): Number of lab procedures (0-132)
+- `num_procedures` (number): Number of procedures (0-6)
+- `number_diagnoses` (number): Total number of diagnoses (1-16)
+- `number_inpatient` (number): Number of inpatient visits (0-21)
+- `number_outpatient` (number): Number of outpatient visits (0-42)
+- `number_emergency` (number): Number of emergency visits (0-76)
 - `diabetesMed` (string): Diabetes medication prescribed - Values: "Yes", "No"
-
-### Optional Fields:
-
-- `weight` (string): Patient weight (often "?")
-- `payer_code` (string): Insurance payer code
-- `medical_specialty` (string): Medical specialty
-- `diag_2` (string): Secondary diagnosis
-- `diag_3` (string): Tertiary diagnosis
-- `metformin` (string): Metformin medication - Values: "No", "Steady", "Up", "Down"
-- `insulin` (string): Insulin medication - Values: "No", "Steady", "Up", "Down"
 - `change` (string): Medication change - Values: "No", "Ch"
+- `A1Cresult` (string): HbA1c test result - Values: ">7", ">8", "Norm", "None"
+- `max_glu_serum` (string): Glucose serum test result - Values: ">200", ">300", "Norm", "None"
+- `insulin` (string): Insulin medication - Values: "Down", "Steady", "Up", "No"
+- `metformin` (string): Metformin medication - Values: "Down", "Steady", "Up", "No"
+- `diagnosis_1` (string): Primary diagnosis code (ICD-9 3-digit code, e.g., "250", "428")
 
 ---
 
