@@ -32,3 +32,16 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 
 # Finder (MacOS) folder config
 .DS_Store
+
+# Testing and temporary files
+test_*.sh
+test_*.pdf
+test_*.json
+*_test_report.pdf
+bulk_*.js
+verify_*.js
+*_errors.json
+sample_data.json
+*.tmp
+*.bak
+*~
