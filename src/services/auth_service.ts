@@ -175,8 +175,8 @@ export class AuthService {
 
   async logout(refreshToken: string): Promise<void> {
     try {
-      // Verify refresh token (this will also remove it from the database)
-      await verifyRefreshToken(refreshToken);
+      // Verify refresh token and remove it from the database
+      await verifyRefreshToken(refreshToken, true);
     } catch (error) {
       // Silent fail for logout - token might already be invalid
       console.log("Logout error (ignored):", error);

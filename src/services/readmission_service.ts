@@ -2,10 +2,47 @@ import type {
   DiabeticPatientData,
   ReadmissionPredictionResponse,
 } from "../types/readmission";
+import type { IPatient } from "../models/patient_model";
 import { BaseErrorException } from "../utils/error_handler";
 
 export class ReadmissionService {
   private readonly FLASK_ML_URL = "http://localhost:8080";
+
+  /**
+   * Convert patient model data to ML API format
+   */
+  private mapPatientToMLFormat(patient: IPatient): DiabeticPatientData {
+    return {
+      age: patient.age,
+      gender: patient.gender,
+      time_in_hospital: patient.time_in_hospital,
+      admission_type: patient.admission_type_id, // Map field name
+      discharge_disposition: patient.discharge_disposition_id, // Map field name
+      admission_source: patient.admission_source_id, // Map field name
+      num_medications: patient.num_medications,
+      num_lab_procedures: patient.num_lab_procedures,
+      num_procedures: patient.num_procedures,
+      number_diagnoses: patient.number_diagnoses,
+      number_inpatient: patient.number_inpatient,
+      number_outpatient: patient.number_outpatient,
+      number_emergency: patient.number_emergency,
+      diabetesMed: patient.diabetesMed,
+      change: patient.change,
+      A1Cresult: patient.A1Cresult,
+      max_glu_serum: patient.max_glu_serum,
+      insulin: patient.insulin,
+      metformin: patient.metformin,
+      diagnosis_1: patient.diag_1, // Map field name
+    };
+  }
+
+  /**
+   * Predict readmission for a patient record from database
+   */
+  async predictReadmissionForPatient(patient: IPatient): Promise<{ confidence_score: number; remedy?: string | null }> {
+    const mlData = this.mapPatientToMLFormat(patient);
+    return this.predictReadmissionScore(mlData);
+  }
 
   /**
    * Call Flask ML API for prediction

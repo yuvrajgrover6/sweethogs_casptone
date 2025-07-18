@@ -330,14 +330,16 @@ export const PatientValidationSchemas = {
       examide: { type: "string", nullable: true },
       citoglipton: { type: "string", nullable: true },
       insulin: { type: "string" },
-      "glyburide-metformin": { type: "string", nullable: true },
-      "glipizide-metformin": { type: "string", nullable: true },
-      "glimepiride-pioglitazone": { type: "string", nullable: true },
-      "metformin-rosiglitazone": { type: "string", nullable: true },
-      "metformin-pioglitazone": { type: "string", nullable: true },
+      glyburide_metformin: { type: "string", nullable: true },
+      glipizide_metformin: { type: "string", nullable: true },
+      glimepiride_pioglitazone: { type: "string", nullable: true },
+      metformin_rosiglitazone: { type: "string", nullable: true },
+      metformin_pioglitazone: { type: "string", nullable: true },
       change: { type: "string" },
       diabetesMed: { type: "string", enum: ["Yes", "No"] },
-      readmitted: { type: "string", enum: ["YES", "NO", ">30", "<30"], nullable: true }
+      readmitted: { type: "string", enum: ["YES", "NO", ">30", "<30"], nullable: true },
+      created_by: { type: "string" },
+      updated_by: { type: "string" }
     },
     required: [
       "encounter_id", "patient_nbr", "gender", "age", "admission_type_id",
@@ -345,7 +347,7 @@ export const PatientValidationSchemas = {
       "num_lab_procedures", "num_procedures", "num_medications",
       "number_outpatient", "number_emergency", "number_inpatient",
       "diag_1", "number_diagnoses", "max_glu_serum", "A1Cresult",
-      "metformin", "insulin", "change", "diabetesMed"
+      "metformin", "insulin", "change", "diabetesMed", "created_by", "updated_by"
     ],
     additionalProperties: false
   },
@@ -395,14 +397,15 @@ export const PatientValidationSchemas = {
       examide: { type: "string", nullable: true },
       citoglipton: { type: "string", nullable: true },
       insulin: { type: "string" },
-      "glyburide-metformin": { type: "string", nullable: true },
-      "glipizide-metformin": { type: "string", nullable: true },
-      "glimepiride-pioglitazone": { type: "string", nullable: true },
-      "metformin-rosiglitazone": { type: "string", nullable: true },
-      "metformin-pioglitazone": { type: "string", nullable: true },
+      glyburide_metformin: { type: "string", nullable: true },
+      glipizide_metformin: { type: "string", nullable: true },
+      glimepiride_pioglitazone: { type: "string", nullable: true },
+      metformin_rosiglitazone: { type: "string", nullable: true },
+      metformin_pioglitazone: { type: "string", nullable: true },
       change: { type: "string" },
       diabetesMed: { type: "string", enum: ["Yes", "No"] },
-      readmitted: { type: "string", enum: ["YES", "NO", ">30", "<30"], nullable: true }
+      readmitted: { type: "string", enum: ["YES", "NO", ">30", "<30"], nullable: true },
+      updated_by: { type: "string" }
     },
     additionalProperties: false
   },
@@ -485,14 +488,16 @@ export const PatientValidationSchemas = {
           examide: { type: "string", nullable: true },
           citoglipton: { type: "string", nullable: true },
           insulin: { type: "string" },
-          "glyburide-metformin": { type: "string", nullable: true },
-          "glipizide-metformin": { type: "string", nullable: true },
-          "glimepiride-pioglitazone": { type: "string", nullable: true },
-          "metformin-rosiglitazone": { type: "string", nullable: true },
-          "metformin-pioglitazone": { type: "string", nullable: true },
+          glyburide_metformin: { type: "string", nullable: true },
+          glipizide_metformin: { type: "string", nullable: true },
+          glimepiride_pioglitazone: { type: "string", nullable: true },
+          metformin_rosiglitazone: { type: "string", nullable: true },
+          metformin_pioglitazone: { type: "string", nullable: true },
           change: { type: "string" },
           diabetesMed: { type: "string", enum: ["Yes", "No"] },
-          readmitted: { type: "string", enum: ["YES", "NO", ">30", "<30"], nullable: true }
+          readmitted: { type: "string", enum: ["YES", "NO", ">30", "<30"], nullable: true },
+          created_by: { type: "string" },
+          updated_by: { type: "string" }
         },
         required: [
           "encounter_id", "patient_nbr", "gender", "age", "admission_type_id",
@@ -500,7 +505,7 @@ export const PatientValidationSchemas = {
           "num_lab_procedures", "num_procedures", "num_medications",
           "number_outpatient", "number_emergency", "number_inpatient",
           "diag_1", "number_diagnoses", "max_glu_serum", "A1Cresult",
-          "metformin", "insulin", "change", "diabetesMed"
+          "metformin", "insulin", "change", "diabetesMed", "created_by", "updated_by"
         ],
         additionalProperties: false
       }

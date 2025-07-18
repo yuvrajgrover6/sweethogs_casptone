@@ -34,6 +34,28 @@ app.use(
   })
 );
 
+// Request logging middleware
+app.use((req, res, next) => {
+  const timestamp = new Date().toISOString();
+  const method = req.method;
+  const url = req.url;
+  const userAgent = req.get('User-Agent') || 'Unknown';
+  const ip = req.ip || req.connection.remoteAddress || 'Unknown';
+  
+  console.log(`🌐 [${timestamp}] ${method} ${url} - IP: ${ip} - UA: ${userAgent}`);
+  
+  // Log request body for POST/PUT/PATCH requests (but hide sensitive data)
+  if (['POST', 'PUT', 'PATCH'].includes(method) && req.body) {
+    const logBody = { ...req.body };
+    // Hide sensitive fields
+    if (logBody.password) logBody.password = '[HIDDEN]';
+    if (logBody.refreshToken) logBody.refreshToken = '[HIDDEN]';
+    console.log(`📝 Request Body:`, logBody);
+  }
+  
+  next();
+});
+
 // Register routes from configuration
 routesConfig.forEach((routeConfig) => {
   const router = express.Router();

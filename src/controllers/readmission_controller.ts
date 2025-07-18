@@ -1,5 +1,7 @@
 import type { Request, Response } from "express";
 import { ReadmissionService } from "../services/readmission_service";
+import { PDFReportService } from "../services/pdf_report_service";
+import { Patient } from "../models/patient_model";
 import { SuccessResult } from "../utils/success_response";
 import type { AuthenticatedRequest } from "../middleware/authMiddleware";
 import type {
@@ -9,6 +11,7 @@ import type {
 import { BaseErrorException } from "../utils/error_handler";
 
 const readmissionService = new ReadmissionService();
+const pdfReportService = new PDFReportService();
 
 /**
  * Predict readmission risk for a single patient
@@ -39,6 +42,60 @@ export async function predictReadmissionController(
         code: 200,
         message: "Readmission prediction completed successfully",
         body: prediction,
+      })
+    );
+  } catch (error) {
+    throw error;
+  }
+}
+
+/**
+ * Predict readmission risk for a patient by their database ID
+ */
+export async function predictReadmissionByPatientIdController(
+  req: AuthenticatedRequest,
+  res: Response
+) {
+  try {
+    const { patientId } = req.params;
+
+    if (!patientId) {
+      throw new BaseErrorException({
+        message: "Patient ID is required",
+        error: "MISSING_PATIENT_ID",
+        logInfo: {},
+        code: 400,
+      });
+    }
+
+    // Fetch patient from database
+    const patient = await Patient.findById(patientId);
+    if (!patient) {
+      throw new BaseErrorException({
+        message: "Patient not found",
+        error: "PATIENT_NOT_FOUND",
+        logInfo: { patientId },
+        code: 404,
+      });
+    }
+
+    // Use the new mapping function to predict readmission
+    const prediction = await readmissionService.predictReadmissionForPatient(patient);
+
+    res.json(
+      new SuccessResult({
+        code: 200,
+        message: "Readmission prediction completed successfully for patient",
+        body: {
+          patient: {
+            id: patient._id,
+            encounter_id: patient.encounter_id,
+            patient_nbr: patient.patient_nbr,
+            gender: patient.gender,
+            age: patient.age,
+          },
+          prediction,
+        },
       })
     );
   } catch (error) {
@@ -201,6 +258,59 @@ export async function testPredictionController(req: Request, res: Response) {
         body: prediction,
       })
     );
+  } catch (error) {
+    throw error;
+  }
+}
+
+/**
+ * Generate PDF report for readmission prediction
+ */
+export async function generatePDFReportController(
+  req: AuthenticatedRequest,
+  res: Response
+) {
+  try {
+    // Expect patient data and optionally prediction results
+    const { patientData, confidenceScore, remedy } = req.body;
+
+    if (!patientData || !patientData.age || !patientData.gender) {
+      throw new BaseErrorException({
+        message: "Patient data is required with at least age and gender",
+        error: "MISSING_PATIENT_DATA",
+        logInfo: {},
+        code: 400,
+      });
+    }
+
+    let finalConfidenceScore = confidenceScore;
+    let finalRemedy = remedy;
+
+    // If confidence score or remedy not provided, get prediction first
+    if (finalConfidenceScore === undefined || !finalRemedy) {
+      const prediction = await readmissionService.predictReadmissionScore(patientData);
+      finalConfidenceScore = prediction.confidence_score / 100; // Convert back to 0-1 range for PDF
+      finalRemedy = prediction.remedy || "No specific medical insights available at this time.";
+    }
+
+    // Generate PDF report
+    const pdfBuffer = await pdfReportService.generateMedicalReport({
+      patientData,
+      confidenceScore: finalConfidenceScore,
+      remedy: finalRemedy
+    });
+
+    // Set response headers for PDF download
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const filename = `medical_report_${timestamp}.pdf`;
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.setHeader('Content-Length', pdfBuffer.length);
+
+    // Send PDF buffer
+    res.end(pdfBuffer);
+
   } catch (error) {
     throw error;
   }

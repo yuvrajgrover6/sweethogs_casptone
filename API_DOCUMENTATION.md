@@ -497,6 +497,85 @@ curl -X GET "http://localhost:3000/readmission/model-info" \
 
 ---
 
+### 5. Generate PDF Report (Protected)
+
+**Endpoint:** `POST /readmission/generate-pdf`  
+**Authentication:** Required  
+**Description:** Generate a professional PDF medical report for readmission prediction
+
+#### Request Body Schema:
+
+Option 1 - With existing prediction data:
+```json
+{
+  "patientData": {
+    // Patient data (same structure as prediction endpoint)
+  },
+  "confidenceScore": 0.74,
+  "remedy": "AI-generated medical insights and recommendations"
+}
+```
+
+Option 2 - Auto-prediction (system will predict automatically):
+```json
+{
+  "patientData": {
+    // Patient data (same structure as prediction endpoint)
+  }
+}
+```
+
+#### Request Example:
+
+```bash
+curl -X POST "http://localhost:3000/readmission/generate-pdf" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -d '{
+    "patientData": {
+      "age": "[50-60)",
+      "gender": "Female",
+      "time_in_hospital": 5,
+      "admission_type": 1,
+      "discharge_disposition": 1,
+      "admission_source": 1,
+      "num_medications": 10,
+      "num_lab_procedures": 30,
+      "num_procedures": 2,
+      "number_diagnoses": 3,
+      "number_inpatient": 1,
+      "number_outpatient": 2,
+      "number_emergency": 0,
+      "diabetesMed": "Yes",
+      "change": "Ch",
+      "A1Cresult": "Norm",
+      "max_glu_serum": "None",
+      "insulin": "No",
+      "metformin": "Steady",
+      "diagnosis_1": "250.00"
+    },
+    "confidenceScore": 0.74,
+    "remedy": "Despite well-controlled diabetes, this patient has elevated readmission risk. Focus on robust post-discharge planning and medication reconciliation."
+  }' \
+  --output "medical_report.pdf"
+```
+
+#### Response:
+
+The endpoint returns a PDF file as binary data with appropriate headers:
+- `Content-Type: application/pdf`
+- `Content-Disposition: attachment; filename="medical_report_TIMESTAMP.pdf"`
+
+The generated PDF includes:
+- **Institutional branding** (Humber College & Team SweatHogs)
+- **Patient information** in formatted tables
+- **Risk assessment** with visual charts
+- **AI-generated medical insights** and recommendations
+- **Risk explanation** and disclaimers
+- **Professional medical report formatting**
+
+---
+
 ## Patient Data Field Specifications
 
 ### Required Fields:

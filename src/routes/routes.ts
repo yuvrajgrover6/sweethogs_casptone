@@ -18,8 +18,10 @@ import {
 import {
   predictReadmissionController,
   predictBatchReadmissionController,
+  predictReadmissionByPatientIdController,
   getModelInfoController,
   testPredictionController,
+  generatePDFReportController,
 } from "../controllers/readmission_controller";
 import PatientController from "../controllers/patient_controller";
 import { authenticateToken } from "../middleware/authMiddleware";
@@ -119,6 +121,12 @@ export const routesConfig = [
         ],
       },
       {
+        path: "/predict/patient/:patientId",
+        method: "GET",
+        handler: predictReadmissionByPatientIdController,
+        middleware: [authenticateToken],
+      },
+      {
         path: "/predict/batch",
         method: "POST",
         handler: predictBatchReadmissionController,
@@ -137,6 +145,12 @@ export const routesConfig = [
         path: "/test",
         method: "GET",
         handler: testPredictionController,
+      },
+      {
+        path: "/generate-pdf",
+        method: "POST",
+        handler: generatePDFReportController,
+        middleware: [authenticateToken],
       },
     ],
   },

@@ -132,7 +132,7 @@ export function checkAuthToken(token: string | undefined): TokenPayload {
   }
 }
 
-export async function verifyRefreshToken(token: string): Promise<TokenPayload> {
+export async function verifyRefreshToken(token: string, removeToken: boolean = false): Promise<TokenPayload> {
   if (!token) {
     throw new BaseErrorException({
       message: "No refresh token provided",
@@ -176,9 +176,11 @@ export async function verifyRefreshToken(token: string): Promise<TokenPayload> {
       });
     }
 
-    // IMPORTANT: Remove the used refresh token from database (rotation)
-    user.refreshTokens = user.refreshTokens.filter((rt) => rt !== token);
-    await user.save();
+    // Only remove the token if explicitly requested (for logout or rotation)
+    if (removeToken) {
+      user.refreshTokens = user.refreshTokens.filter((rt) => rt !== token);
+      await user.save();
+    }
 
     return decoded;
   } catch (error) {
@@ -212,7 +214,8 @@ export function checkAdmin(token: string | undefined): TokenPayload {
 export async function refreshAccessToken(
   refreshToken: string
 ): Promise<TokenPair> {
-  const decoded = await verifyRefreshToken(refreshToken);
+  // First verify the refresh token without removing it
+  const decoded = await verifyRefreshToken(refreshToken, false);
 
   // Generate new token pair with same payload but fresh expiration
   const newTokenPair = generateTokenPair({
@@ -221,12 +224,17 @@ export async function refreshAccessToken(
     role: decoded.role,
   });
 
-  // Store the new refresh token in the database
+  // Now handle token rotation: remove old token and add new one
   const user = await User.findById(decoded.userId);
   if (user) {
     if (!user.refreshTokens) {
       user.refreshTokens = [];
     }
+    
+    // Remove the old refresh token (rotation)
+    user.refreshTokens = user.refreshTokens.filter((rt) => rt !== refreshToken);
+    
+    // Add the new refresh token
     user.refreshTokens.push(newTokenPair.refreshToken);
     await user.save();
   }
