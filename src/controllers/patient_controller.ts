@@ -168,6 +168,20 @@ class PatientController {
     }
   }
 
+  // Get patient analytics for charts and graphs
+  async getPatientAnalytics(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      console.log('Analytics controller method called');
+      const result = await PatientService.getPatientAnalytics();
+      console.log('Analytics result:', result);
+      res.status(result.code).json(result);
+    } catch (error) {
+      console.log('Analytics controller error:', error);
+      const err = basicErrorResults(error, "Failed to retrieve patient analytics");
+      res.status(err.code).json(err);
+    }
+  }
+
   // Import sample data
   async importSampleData(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {

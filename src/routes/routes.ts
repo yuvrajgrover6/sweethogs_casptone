@@ -179,6 +179,12 @@ export const routesConfig = [
         middleware: [authenticateToken],
       },
       {
+        path: "/analytics",
+        method: "GET", 
+        handler: (req: any, res: any) => PatientController.getPatientAnalytics(req, res),
+        middleware: [authenticateToken],
+      },
+      {
         path: "/import-sample",
         method: "POST",
         handler: (req: any, res: any) => PatientController.importSampleData(req, res),

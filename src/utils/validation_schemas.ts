@@ -405,6 +405,7 @@ export const PatientValidationSchemas = {
       change: { type: "string" },
       diabetesMed: { type: "string", enum: ["Yes", "No"] },
       readmitted: { type: "string", enum: ["YES", "NO", ">30", "<30"], nullable: true },
+      created_by: { type: "string" },
       updated_by: { type: "string" }
     },
     additionalProperties: false
